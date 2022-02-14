@@ -37,7 +37,7 @@ const resolveRefPackages = (entrypoint) => {
   }, {});
 };
 
-const typescriptReferences = {
+const tsReferences = {
   name: 'typescript-references',
   setup(build) {
     const refPackages = build.initialOptions.entryPoints.reduce(
@@ -79,4 +79,4 @@ const typescriptReferences = {
   },
 };
 
-module.exports = typescriptReferences;
+module.exports = tsReferences;

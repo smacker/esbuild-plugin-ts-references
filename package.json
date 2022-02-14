@@ -1,17 +1,28 @@
 {
-  "name": "esbuild-typescript-references",
+  "name": "esbuild-plugin-ts-references",
   "version": "0.0.1",
-  "description": "Support Typescript references in esbuild",
+  "description": "esbuild plugin for typescript references",
   "main": "index.js",
   "scripts": {
     "lint": "eslint index.js test/index.js",
     "test": "node test"
   },
-  "author": "Maxim Sukharev <max@smacker.ru>",
-  "license": "MIT",
   "devDependencies": {
     "esbuild": "^0.14.21",
     "eslint": "^8.9.0",
     "uvu": "^0.5.3"
-  }
+  },
+  "files": [
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smacker/esbuild-plugin-ts-references.git"
+  },
+  "keywords": [
+    "esbuild",
+    "plugin"
+  ],
+  "author": "Maxim Sukharev <max@smacker.ru>",
+  "license": "MIT"
 }
