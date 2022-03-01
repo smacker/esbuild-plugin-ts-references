@@ -1,5 +1,6 @@
 {
-  "compilerOptions": {
+  // typescript allows comments
+  "compilerOptions": { // in tsconfig.json
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,

@@ -1,3 +1,7 @@
 {
+  /*
+    multiline comments also work inside
+    tsconfig
+  */
   "references": [{ "path": "../package-a" }]
 }

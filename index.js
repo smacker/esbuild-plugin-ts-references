@@ -1,6 +1,17 @@
 const fs = require('fs');
 const path = require('path');
 
+// regexp is taken from https://github.com/tarkh/json-easy-strip
+const commentsRegexp = /\\"|"(?:\\"|[^"])*"|(\/\/.*|\/\*[\s\S]*?\*\/)/g;
+
+const parseJSONFile = (filePath, stripComments) => {
+  let content = fs.readFileSync(filePath, 'utf8');
+  if (stripComments) {
+    content = content.replace(commentsRegexp, (m, g) => (g ? '' : m));
+  }
+  return JSON.parse(content);
+};
+
 const resolveRefPackages = (entrypoint) => {
   // look for the closest tsconfig
   const rootDir = path.parse(entrypoint).root;
@@ -19,14 +30,13 @@ const resolveRefPackages = (entrypoint) => {
   }
 
   // build map of {'package-name': '/absolute/path'}
-  const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
+  const tsconfig = parseJSONFile(tsconfigPath, true);
   return (tsconfig.references || []).reduce((acc, r) => {
     const refPath = path.resolve(baseDir, r.path);
-    const refPackage = JSON.parse(
-      fs.readFileSync(path.join(refPath, 'package.json'), 'utf8')
-    );
-    const refTsconfig = JSON.parse(
-      fs.readFileSync(path.join(refPath, 'tsconfig.json'), 'utf8')
+    const refPackage = parseJSONFile(path.join(refPath, 'package.json'));
+    const refTsconfig = parseJSONFile(
+      path.join(refPath, 'tsconfig.json'),
+      true
     );
 
     acc[refPackage.name] = path.resolve(
