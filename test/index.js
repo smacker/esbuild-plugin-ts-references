@@ -45,4 +45,17 @@ test('mutiple entries', async () => {
   });
 });
 
+test('mutiple entries with entry points object', async () => {
+  // just make sure there is no exception
+  esbuild.build({
+    entryPoints: {
+      packageA: './test/monorepo/package-a/src/index.ts',
+      packageB: './test/monorepo/package-b/src/index.ts',
+    },
+    bundle: true,
+    outdir: './test/output',
+    plugins: [typescriptReferences],
+  });
+});
+
 test.run();

@@ -50,7 +50,11 @@ const resolveRefPackages = (entrypoint) => {
 const tsReferences = {
   name: 'typescript-references',
   setup(build) {
-    const refPackages = build.initialOptions.entryPoints.reduce(
+    // Pull out entry points, which can either be specified as an array or an object with custom output paths
+    // https://esbuild.github.io/api/#entry-points
+    const entryPointOptions = build.initialOptions.entryPoints;
+    const entryPoints = Array.isArray(entryPointOptions) ? entryPointOptions : Object.values(entryPointOptions);
+    const refPackages = entryPoints.reduce(
       (acc, entrypoint) => {
         return Object.assign(acc, resolveRefPackages(entrypoint));
       },
