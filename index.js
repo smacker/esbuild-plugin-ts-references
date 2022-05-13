@@ -12,7 +12,38 @@ const parseJSONFile = (filePath, stripComments) => {
   return JSON.parse(content);
 };
 
-const resolveRefPackages = (entrypoint) => {
+const resolveRefPackages = (baseDir, tsconfig, processedDirs) => {
+  if (processedDirs.includes(baseDir)) {
+    return {};
+  }
+
+  processedDirs.push(baseDir);
+
+  return (tsconfig.references || []).reduce((acc, r) => {
+    const refPath = path.resolve(baseDir, r.path);
+    const refPackage = parseJSONFile(path.join(refPath, 'package.json'));
+    const refTsconfig = parseJSONFile(
+      path.join(refPath, 'tsconfig.json'),
+      true
+    );
+    if (!refTsconfig.compilerOptions?.rootDir) {
+      throw new Error(
+        `rootDir is not defined in tsconfig.json of package '${refPackage.name}'`
+      );
+    }
+
+    acc[refPackage.name] = path.resolve(
+      refPath,
+      refTsconfig.compilerOptions.rootDir
+    );
+
+    Object.assign(acc, resolveRefPackages(refPath, refTsconfig, processedDirs));
+
+    return acc;
+  }, {});
+};
+
+const resolveEntrypoint = (entrypoint) => {
   // look for the closest tsconfig
   const rootDir = path.parse(entrypoint).root;
   let baseDir = path.dirname(entrypoint);
@@ -31,20 +62,9 @@ const resolveRefPackages = (entrypoint) => {
 
   // build map of {'package-name': '/absolute/path'}
   const tsconfig = parseJSONFile(tsconfigPath, true);
-  return (tsconfig.references || []).reduce((acc, r) => {
-    const refPath = path.resolve(baseDir, r.path);
-    const refPackage = parseJSONFile(path.join(refPath, 'package.json'));
-    const refTsconfig = parseJSONFile(
-      path.join(refPath, 'tsconfig.json'),
-      true
-    );
-
-    acc[refPackage.name] = path.resolve(
-      refPath,
-      refTsconfig.compilerOptions.rootDir
-    );
-    return acc;
-  }, {});
+  // avoid infinite loop for circular dependencies
+  const processedDirs = [];
+  return resolveRefPackages(baseDir, tsconfig, processedDirs);
 };
 
 const tsReferences = {
@@ -53,13 +73,12 @@ const tsReferences = {
     // Pull out entry points, which can either be specified as an array or an object with custom output paths
     // https://esbuild.github.io/api/#entry-points
     const entryPointOptions = build.initialOptions.entryPoints;
-    const entryPoints = Array.isArray(entryPointOptions) ? entryPointOptions : Object.values(entryPointOptions);
-    const refPackages = entryPoints.reduce(
-      (acc, entrypoint) => {
-        return Object.assign(acc, resolveRefPackages(entrypoint));
-      },
-      {}
-    );
+    const entryPoints = Array.isArray(entryPointOptions)
+      ? entryPointOptions
+      : Object.values(entryPointOptions);
+    const refPackages = entryPoints.reduce((acc, entrypoint) => {
+      return Object.assign(acc, resolveEntrypoint(entrypoint));
+    }, {});
 
     // resolve packages
     const packageNames = Object.keys(refPackages);

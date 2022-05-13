@@ -32,6 +32,16 @@ test('simple resolution', async () => {
   );
 });
 
+test('transitive dependency resolution', async () => {
+  await build(['./test/monorepo/package-c/src/index.ts']);
+
+  const output = fs.readFileSync('./test/output.js', 'utf8');
+  asset.fixture(
+    output,
+    fs.readFileSync('./test/expected/transitive-resolution.js', 'utf8')
+  );
+});
+
 test('mutiple entries', async () => {
   // just make sure there is no exception
   esbuild.build({

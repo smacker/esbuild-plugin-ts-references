@@ -9,4 +9,7 @@
   console.log(a);
   console.log(anotherA);
   var b = "b";
+
+  // test/monorepo/package-c/src/index.ts
+  console.log(b);
 })();

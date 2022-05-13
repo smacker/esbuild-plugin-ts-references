@@ -3,5 +3,13 @@
     multiline comments also work inside
     tsconfig
   */
-  "references": [{ "path": "../package-a" }]
+  "references": [{ "path": "../package-a" }],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "sourceMap": true,
+    "composite": true
+  },
+  "include": ["src/**/*"]
 }
