@@ -12,6 +12,13 @@ const parseJSONFile = (filePath, stripComments) => {
   return JSON.parse(content);
 };
 
+const replacePrefix = (input, searchValue, replaceValue) => {
+  if (input.startsWith(searchValue)) {
+    return replaceValue + input.slice(searchValue.length);
+  }
+  return input;
+};
+
 const resolveRefPackages = (baseDir, tsconfig, processedDirs) => {
   if (processedDirs.includes(baseDir)) {
     return {};
@@ -32,10 +39,10 @@ const resolveRefPackages = (baseDir, tsconfig, processedDirs) => {
       );
     }
 
-    acc[refPackage.name] = path.resolve(
-      refPath,
-      refTsconfig.compilerOptions.rootDir
-    );
+    acc[refPackage.name] = {
+      rootDir: refTsconfig.compilerOptions.rootDir,
+      resolveDir: path.resolve(refPath, refTsconfig.compilerOptions.rootDir),
+    };
 
     Object.assign(acc, resolveRefPackages(refPath, refTsconfig, processedDirs));
 
@@ -93,15 +100,16 @@ const tsReferences = {
       if (!refPackages[package]) {
         for (const name of packageNames) {
           if (package.startsWith(name)) {
-            file = './' + package.replace(name + '/', '');
+            file = './' + package.slice(name.length + 1);
             package = name;
             break;
           }
         }
       }
+      file = replacePrefix(file, refPackages[package].rootDir, './');
 
       const result = await build.resolve(file, {
-        resolveDir: refPackages[package],
+        resolveDir: refPackages[package].resolveDir,
       });
       if (result.errors.length > 0) {
         return { errors: result.errors };
