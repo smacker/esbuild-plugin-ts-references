@@ -3,9 +3,13 @@
   "version": "0.2.0",
   "description": "esbuild plugin for typescript references",
   "main": "index.js",
+  "typings": "index.d.ts",
   "scripts": {
     "lint": "eslint index.js test/index.js",
     "test": "node test"
+  },
+  "peerDependencies": {
+    "esbuild": ">= 0.14.21"
   },
   "devDependencies": {
     "esbuild": "^0.14.21",
