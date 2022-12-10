@@ -110,6 +110,7 @@ const tsReferences = {
 
       const result = await build.resolve(file, {
         resolveDir: refPackages[package].resolveDir,
+        kind: 'entry-point'
       });
       if (result.errors.length > 0) {
         return { errors: result.errors };
